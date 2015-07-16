@@ -1,11 +1,14 @@
 # Swift コーディング規約
 
-規約を決めるにあたって判断基準を重要度別に並べます
+規約を決めるにあたっての判断基準の重要度順
+
 * 誤読の可能性が低いこと
 * 意図が明白であること
 * 簡潔に記述できること
 
-強制力
+各規約の強制力
+Must以外はコードレビュー時に修正するかどうかの判断を各プロジェクトに委ねる
+
 * 従うべき (Must, Must Not)
 * 従うのが良い (Good, Bad)
 * 従うのが好ましい (Preferred, Not Preferred)
@@ -16,7 +19,6 @@ __wantedly__ http://qiita.com/susieyy/items/f71435cc962e70d81b37
 __GitHub__ https://github.com/github/swift-style-guide
 
 __RayWenderlich__ https://github.com/raywenderlich/swift-style-guide
-
 
 
 ## Declaration
@@ -412,3 +414,90 @@ enum CustomResult: Int {
 button.setTitle("title", forState: UIControlState.Normal)
 var state: UIControlState = UIControlState.Normal
 ```
+
+グローバルな列挙型を定義するときは、クラススコープ、ストラクチャスコープで記述できないか検討する。
+
+**Preferred:**
+
+```swift
+class NetworkManager {
+    enum CustomResult: String {
+        case Success = "success",
+        case Error = "error" 
+    }
+    var customResult: CustomResult? 
+}
+```
+
+**Not Preferred:**
+
+```swift
+enum CustomResult: String {
+    case Success = "success",
+    case Error = "error" 
+}
+
+class NetworkManager {
+    var customResult: CustomResult? 
+}
+```
+
+## クラス
+
+読み取り専用のプロパティと添字付けでは暗黙的なgetterを優先する
+
+**Preferred:**
+
+```swift
+var myGreatProperty: Int {
+    return 4
+}
+
+subscript(index: Int) -> T {
+    return objects[index]
+}
+```
+
+**Not Preferred:**
+
+```swift
+var myGreatProperty: Int {
+    get {
+        return 4
+    }
+}
+
+subscript(index: Int) -> T {
+    get {
+        return objects[index]
+    }
+}
+```
+
+selfの持つプロパティやメソッドへアクセスする時、デフォルトではselfへの参照は省きましょう。
+明示的にselfを入れるのは言語によって必要と判断された場合だけにしましょう-たとえばクロージャ内、もしくはパラメータ名の衝突などです。
+
+**Preferred:**
+
+```swift
+private class History {
+    var events: [Event]
+
+    func rewrite() {
+        events = []
+    }
+}
+
+extension History {
+    init(events: [Event]) {
+        self.events = events
+    }
+
+    var whenVictorious: () -> () {
+        return {
+            self.rewrite()
+        }
+    }
+}
+```
+
